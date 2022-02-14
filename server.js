@@ -7,6 +7,8 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Routes
+
 app.get("/", (req, res) => res.redirect("/dogs")); // why do we need to redirect from /??
 
 app.get("/dogs", async (req, res, next) => {
@@ -20,7 +22,7 @@ app.get("/dogs", async (req, res, next) => {
                     <title>Doodle Dogs</title>
                 </head>
                 <body>
-                    <h1>Eros And Doodle Friends<h2>
+                    <h1>Eros And Doodle Friends!<h2>
                     <ul>
                         ${dogs
                           .map(
@@ -35,9 +37,51 @@ app.get("/dogs", async (req, res, next) => {
 
     res.send(html);
   } catch (err) {
-    console.log(err);
+    next(err);
   }
 });
+
+app.get('/dogs/otherBreed', (req, res, next) => {
+    try {
+        res.send(`
+        <div>
+            <h1>Rooster is an Australian Shepherd</h1>
+        </div>
+        `)
+    } catch (err){
+        next(err)
+    }
+})
+
+app.get('/dogs/:id', async(req, res, next) => {
+    try {
+        const types = await Type.findByPk(req.params.id, {
+            include: [Dog]
+        })
+        const html = `
+            <html>
+                <head>
+                    <title>Doodle Type</title>
+                </head>
+                <body>
+                    <h1>${types.name} type:</h1>
+                    <a href='/dogs'>Back</a>
+                    <ul>
+                    ${types.dogs.map( dog => `
+                        <li><h2>${dog.name}</h2></li>
+                    `).join('')}
+                    </ul>
+                </body>
+            </html>
+        `
+        res.send(html)
+    } catch (err){
+        next(err)
+    }
+})
+
+
+// Setting up the data
 
 const Dog = sequelize.define("dog", {
   name: {
