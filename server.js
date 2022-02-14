@@ -7,11 +7,24 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Middleware
 app.use(express.urlencoded({extended: false})) // need this middleware when setting up post route to see the data from input -- gives us JSON output
+
+app.use(require('method-override')('_method')) // this middleware we need for PUT and DELETE routes
 
 // Routes
 
 app.get("/", (req, res) => res.redirect("/dogs")); // why do we need to redirect from /??
+
+app.delete('/dogs/:id', async(req, res, next) => {
+    try {
+        const dog = await Dog.findByPk(req.params.id)
+        await dog.destroy()
+        res.redirect(`/dogs/${dog.typeId}`)
+    } catch (err) {
+        next(err)
+    }
+})
 
 app.post('/dogs', async(req, res, next) => {
     try {
@@ -81,20 +94,25 @@ app.get('/dogs/otherBreed', (req, res, next) => {
 
 app.get('/dogs/:id', async(req, res, next) => {
     try {
-        const types = await Type.findByPk(req.params.id, {
+        const type = await Type.findByPk(req.params.id, {
             include: [Dog]
         })
+        
         const html = `
             <html>
                 <head>
                     <title>Doodle Type</title>
                 </head>
                 <body>
-                    <h1>${types.name} type:</h1>
+                    <h1>${type.name} type:</h1>
                     <a href='/dogs'>Back</a>
                     <ul>
-                    ${types.dogs.map( dog => `
-                        <li><h2>${dog.name}</h2></li>
+                    ${type.dogs.map( dog => `
+                        <li><span><h2>${dog.name}</h2>
+                            <form method="POST" action='/dogs/${dog.id}?_method=DELETE'>
+                                <button>X</button>
+                            </form></span>
+                        </li>
                     `).join('')}
                     </ul>
                 </body>
