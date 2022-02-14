@@ -7,22 +7,49 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(express.urlencoded({extended: false})) // need this middleware when setting up post route to see the data from input -- gives us JSON output
+
 // Routes
 
 app.get("/", (req, res) => res.redirect("/dogs")); // why do we need to redirect from /??
+
+app.post('/dogs', async(req, res, next) => {
+    try {
+        const dog = await Dog.create(req.body)
+        res.redirect(`/dogs/${dog.typeId}`)
+    } catch (err) {
+        next(err)
+    }
+})
 
 app.get("/dogs", async (req, res, next) => {
   try {
     const dogs = await Dog.findAll({
       include: [Type],
     });
-    const html = `
+    const types = await Type.findAll()
+    const options = types.map( type => `
+        <option value=${type.id}>
+            ${type.name}
+        </option>
+    `)
+    const htmlForm = `
+        <form method="POST">
+            <input name="name" placeholder="dog's name"/>
+            <select name="typeId"/>
+                ${options}
+            </select>
+            <button>Add</button>
+        </form>
+    `
+    res.send( `
             <html>
                 <head>
                     <title>Doodle Dogs</title>
                 </head>
                 <body>
                     <h1>Eros And Doodle Friends!<h2>
+                    ${htmlForm}
                     <ul>
                         ${dogs
                           .map(
@@ -33,9 +60,8 @@ app.get("/dogs", async (req, res, next) => {
                     </ul>
                 </body>
             </html>
-        `;
+        `);
 
-    res.send(html);
   } catch (err) {
     next(err);
   }
