@@ -24,10 +24,15 @@ app.delete("/dogs/:id", async (req, res, next) => {
 
 app.post("/dogs", async (req, res, next) => {
   try {
-    if (!req.body) {
-        res.send(`<html>Please provide a name</html>`)   //fix this!!!!
+    if (!req.body.name) {
+        res.send(`<html><h1>Please provide a name!<h1></html>`)
     }
-    const dog = await Dog.create(req.body);
+    const nameExists = await Dog.findAll({
+        where: {
+            name: req.body.name
+        }
+    })
+    const dog = nameExists.length > 0 ? nameExists[0] : await Dog.create(req.body)
     res.redirect(`/dogs/${dog.typeId}`) 
   } catch (err) {
     next(err);

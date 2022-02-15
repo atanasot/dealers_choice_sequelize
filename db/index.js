@@ -12,11 +12,7 @@ const Dog = sequelize.define("dog", {
     allowNull: false,
     unique: true,
     validate: {
-        customValidator (value) {
-            if (!value) {
-                throw new Error('Please provide a name!')
-            }
-        }
+        len : [1,20]
     }
   },
 });
