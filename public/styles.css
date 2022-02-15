@@ -1,0 +1,15 @@
+
+
+body {
+    font-family: verdana;
+    padding: 30px;
+}
+
+a {
+    color: purple;
+    font-style: italic;
+}
+
+ul {
+    list-style-type: none;
+}
