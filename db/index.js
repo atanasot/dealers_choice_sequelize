@@ -12,8 +12,8 @@ const Dog = sequelize.define("dog", {
     allowNull: false,
     unique: true,
     validate: {
-        len : [1,20]
-    }
+      len: [1, 20],
+    },
   },
 });
 
@@ -90,10 +90,10 @@ const syncAndSeed = async () => {
 };
 
 module.exports = {
-    sequelize,
-    syncAndSeed,
-    models: {
-        Dog,
-        Type
-    }
-}
+  sequelize,
+  syncAndSeed,
+  models: {
+    Dog,
+    Type,
+  },
+};
