@@ -6,6 +6,17 @@ const router = require("express").Router();
 
 // Routes
 
+router.put("/:id", async (req, res, next) => {
+  try {
+    const dog = await Dog.findByPk(req.params.id);
+    dog.name = req.body.name;
+    await dog.save();
+    res.redirect(`/dogs/${dog.typeId}`);
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.delete("/:id", async (req, res, next) => {
   try {
     const dog = await Dog.findByPk(req.params.id);
@@ -37,7 +48,10 @@ router.post("/", async (req, res, next) => {
 router.get("/", async (req, res, next) => {
   try {
     const dogs = await Dog.findAll({
-      include: [Type],
+      include: [Type], 
+      order: [
+        ["name", "ASC"]
+      ]
     });
     const types = await Type.findAll();
     const options = types.map(
@@ -115,10 +129,14 @@ router.get("/:id", async (req, res, next) => {
                     ${type.dogs
                       .map(
                         (dog) => `
-                        <li><span><h2>${dog.name}</h2>
+                        <li><h2>${dog.name}</h2>
                             <form method="POST" action='/dogs/${dog.id}?_method=DELETE'>
                                 <button>X</button>
-                            </form></span>
+                            </form>
+                            <form method="POST" action='/dogs/${dog.id}?_method=PUT'>
+                                <input name='name' placeholder='New Name'/>
+                                <button>Submit</button>
+                            </form>
                         </li>
                     `
                       )
